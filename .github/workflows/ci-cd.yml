@@ -7,7 +7,8 @@ on:
     branches: [main]
 
 env:
-  JF_URL: ${{ secrets.JFROG_URL }}
+  JF_URL: ${{ secrets.JFROG_PLATFORM_URL }}
+  JF_DOCKER_REGISTRY: ${{ secrets.JFROG_DOCKER_REGISTRY }}
   JF_USER: ${{ secrets.JFROG_USERNAME }}
   JF_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
   JF_BUILD_NAME: pms-build
