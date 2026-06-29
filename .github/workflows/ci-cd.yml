@@ -91,52 +91,21 @@ jobs:
         run: |
           jf rt build-add-git "${{ env.JF_BUILD_NAME }}" "${{ env.JF_BUILD_NUMBER }}" .
 
-      - name: Build frontend
-        working-directory: frontend
-        run: npm install --legacy-peer-deps && npm run build
-
-      - name: Upload Frontend Artifacts to JFrog Artifactory
+      - name: Login to JFrog Docker Registry
         run: |
-          VERSION_TAG="${{ github.sha }}"
-          ENV_NAME="dev"
+          jf docker login ${{ env.JF_URL }} --access-token ${{ env.JF_ACCESS_TOKEN }}
 
-          ARTIFACT_PATH="frontend/dist/"
-          TARGET_REPO="git-repo"
-          TARGET_PATH="${TARGET_REPO}/pms-builds/${ENV_NAME}/${VERSION_TAG}/"
-
-          echo "Uploading: ${ARTIFACT_PATH} -> ${TARGET_PATH}"
-
-          jf rt upload \
-            --build-name "${{ env.JF_BUILD_NAME }}" \
-            --build-number "${{ env.JF_BUILD_NUMBER }}" \
-            --project "${{ env.JF_PROJECT }}" \
-            --recursive \
-            "${ARTIFACT_PATH}**" \
-            "${TARGET_PATH}"
-
-          echo "Upload complete! https://${{ env.JF_URL }}/artifactory/${TARGET_PATH}"
-
-      - name: Upload Backend Artifacts to JFrog Artifactory
+      - name: Build & push backend Docker image
         run: |
-          VERSION_TAG="${{ github.sha }}"
-          ENV_NAME="dev"
+          docker build -t ${{ env.JF_URL }}/pms-backend:${{ github.sha }} -t ${{ env.JF_URL }}/pms-backend:latest ./backend
+          jf docker push ${{ env.JF_URL }}/pms-backend:${{ github.sha }} --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
+          jf docker push ${{ env.JF_URL }}/pms-backend:latest --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
 
-          ARTIFACT_PATH="backend/"
-          TARGET_REPO="git-repo"
-          TARGET_PATH="${TARGET_REPO}/pms-backend/${ENV_NAME}/${VERSION_TAG}/"
-
-          echo "Uploading: ${ARTIFACT_PATH} -> ${TARGET_PATH}"
-
-          jf rt upload \
-            --build-name "${{ env.JF_BUILD_NAME }}" \
-            --build-number "${{ env.JF_BUILD_NUMBER }}" \
-            --project "${{ env.JF_PROJECT }}" \
-            --recursive \
-            --exclude-patterns="*__pycache__*;*.pyc;*.egg-info*;venv/*;.venv/*" \
-            "${ARTIFACT_PATH}**" \
-            "${TARGET_PATH}"
-
-          echo "Upload complete! https://${{ env.JF_URL }}/artifactory/${TARGET_PATH}"
+      - name: Build & push frontend Docker image
+        run: |
+          docker build -t ${{ env.JF_URL }}/pms-frontend:${{ github.sha }} -t ${{ env.JF_URL }}/pms-frontend:latest ./frontend
+          jf docker push ${{ env.JF_URL }}/pms-frontend:${{ github.sha }} --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
+          jf docker push ${{ env.JF_URL }}/pms-frontend:latest --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
 
       - name: Publish Build Info to JFrog
         run: |
