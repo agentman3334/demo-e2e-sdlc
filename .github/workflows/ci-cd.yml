@@ -133,22 +133,15 @@ jobs:
             -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:latest \
             ./backend
             
-      - name: Tag Backend Image
-        run: |
-          docker tag pms-backend:${{ github.sha }} \
-            demoartifacthw.jfrog.io/docker-dev-local/pms-backend:${{ github.sha }}\      
-          docker tag pms-backend:${{ github.sha }} \
-            demoartifacthw.jfrog.io/docker-dev-local/pms-backend:latest
-
       - name: Push Backend Image
         run: |
-          jf docker push \
+          docker push \
             ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:${{ github.sha }} \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
 
-          jf docker push \
+          docker push \
             ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:latest \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
@@ -161,23 +154,15 @@ jobs:
             -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:latest \
             ./frontend
 
-      - name: Tag Frontend Image
-        run: |
-          docker tag pms-frontend:${{ github.sha }} \
-            demoartifacthw.jfrog.io/docker-dev-local/pms-frontend:${{ github.sha }}\      
-          docker tag pms-frontend:${{ github.sha }} \
-            demoartifacthw.jfrog.io/docker-dev-local/pms-frontend:latest
-
-
       - name: Push Frontend Image
         run: |
-          jf docker push \
+          docker push \
             ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:${{ github.sha }} \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
 
-          jf docker push \
+          docker push \
             ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:latest \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
