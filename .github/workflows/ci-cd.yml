@@ -106,7 +106,7 @@ jobs:
           jf config add jfrog \
             --url=https://${{ env.JF_URL }} \
             --user=${{ env.JF_USERNAME }} \
-            --access-token=${{ env.JF_ACCESS_TOKEN }} \
+            --access-token=${{ env.JF_PASSWORD }} \
             --interactive=false
 
           jf config use jfrog
