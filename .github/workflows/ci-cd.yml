@@ -8,6 +8,7 @@ on:
 
 env:
   JF_URL: ${{ secrets.JFROG_URL }}
+  JF_USERNAME: ${{ secrets.JFROG_USERNAME }}
   JF_ACCESS_TOKEN: ${{ secrets.JFROG_PASS }}
   JF_BUILD_NAME: pms-build
   JF_BUILD_NUMBER: ${{ github.run_number }}
@@ -16,9 +17,11 @@ env:
 jobs:
   lint-and-test-backend:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: backend
+
     services:
       postgres:
         image: postgres:15
@@ -33,46 +36,65 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest pytest-asyncio httpx
-      - name: Lint with ruff
         run: |
-          pip install ruff
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx ruff
+
+      - name: Lint with Ruff
+        run: |
           ruff check app/ --output-format=github || true
+
       - name: Run tests
         env:
           DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/pms_test
           SECRET_KEY: test-secret-key
-        run: pytest --tb=short -q || true
+        run: |
+          pytest --tb=short -q || true
 
   lint-and-test-frontend:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: frontend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+
       - name: Lint
-        run: npx eslint src/ --ext .js,.jsx || true
+        run: |
+          npx eslint src/ --ext .js,.jsx || true
+
       - name: Build
         run: npm run build
 
   build-and-push:
-    needs: [lint-and-test-backend, lint-and-test-frontend]
+    needs:
+      - lint-and-test-backend
+      - lint-and-test-frontend
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -81,47 +103,89 @@ jobs:
 
       - name: Configure JFrog CLI
         run: |
-          jf config add manual-jfrog \
-            --url https://${{ env.JF_URL }} \
-            --access-token ${{ env.JF_ACCESS_TOKEN }} \
+          jf config add jfrog \
+            --url=https://${{ env.JF_URL }} \
+            --user=${{ env.JF_USERNAME }} \
+            --access-token=${{ env.JF_ACCESS_TOKEN }} \
             --interactive=false
-          jf config use manual-jfrog
+
+          jf config use jfrog
 
       - name: Add Git Info to Build
         run: |
-          jf rt build-add-git "${{ env.JF_BUILD_NAME }}" "${{ env.JF_BUILD_NUMBER }}" .
+          jf rt build-add-git \
+            "${{ env.JF_BUILD_NAME }}" \
+            "${{ env.JF_BUILD_NUMBER }}" .
 
-      - name: Login to JFrog Docker Registry
+      - name: Docker Login
         run: |
-          jf docker login ${{ env.JF_URL }} --access-token ${{ env.JF_ACCESS_TOKEN }}
+          echo "${{ env.JF_ACCESS_TOKEN }}" | docker login ${{ env.JF_URL }} \
+            -u "${{ env.JF_USERNAME }}" \
+            --password-stdin
 
-      - name: Build & push backend Docker image
+      - name: Build Backend Image
         run: |
-          docker build -t ${{ env.JF_URL }}/pms-backend:${{ github.sha }} -t ${{ env.JF_URL }}/pms-backend:latest ./backend
-          jf docker push ${{ env.JF_URL }}/pms-backend:${{ github.sha }} --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
-          jf docker push ${{ env.JF_URL }}/pms-backend:latest --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
+          docker build \
+            -t ${{ env.JF_URL }}/docker-dev-local/pms-backend:${{ github.sha }} \
+            -t ${{ env.JF_URL }}/docker-dev-local/pms-backend:latest \
+            ./backend
 
-      - name: Build & push frontend Docker image
+      - name: Push Backend Image
         run: |
-          docker build -t ${{ env.JF_URL }}/pms-frontend:${{ github.sha }} -t ${{ env.JF_URL }}/pms-frontend:latest ./frontend
-          jf docker push ${{ env.JF_URL }}/pms-frontend:${{ github.sha }} --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
-          jf docker push ${{ env.JF_URL }}/pms-frontend:latest --build-name ${{ env.JF_BUILD_NAME }} --build-number ${{ env.JF_BUILD_NUMBER }} --project ${{ env.JF_PROJECT }}
+          jf docker push \
+            ${{ env.JF_URL }}/docker-dev-local/pms-backend:${{ github.sha }} \
+            --build-name ${{ env.JF_BUILD_NAME }} \
+            --build-number ${{ env.JF_BUILD_NUMBER }} \
+            --project ${{ env.JF_PROJECT }}
 
-      - name: Publish Build Info to JFrog
+          jf docker push \
+            ${{ env.JF_URL }}/docker-dev-local/pms-backend:latest \
+            --build-name ${{ env.JF_BUILD_NAME }} \
+            --build-number ${{ env.JF_BUILD_NUMBER }} \
+            --project ${{ env.JF_PROJECT }}
+
+      - name: Build Frontend Image
         run: |
-          jf rt build-publish "${{ env.JF_BUILD_NAME }}" "${{ env.JF_BUILD_NUMBER }}" \
+          docker build \
+            -t ${{ env.JF_URL }}/docker-dev-local/pms-frontend:${{ github.sha }} \
+            -t ${{ env.JF_URL }}/docker-dev-local/pms-frontend:latest \
+            ./frontend
+
+      - name: Push Frontend Image
+        run: |
+          jf docker push \
+            ${{ env.JF_URL }}/docker-dev-local/pms-frontend:${{ github.sha }} \
+            --build-name ${{ env.JF_BUILD_NAME }} \
+            --build-number ${{ env.JF_BUILD_NUMBER }} \
+            --project ${{ env.JF_PROJECT }}
+
+          jf docker push \
+            ${{ env.JF_URL }}/docker-dev-local/pms-frontend:latest \
+            --build-name ${{ env.JF_BUILD_NAME }} \
+            --build-number ${{ env.JF_BUILD_NUMBER }} \
+            --project ${{ env.JF_PROJECT }}
+
+      - name: Publish Build Info
+        run: |
+          jf rt build-publish \
+            "${{ env.JF_BUILD_NAME }}" \
+            "${{ env.JF_BUILD_NUMBER }}" \
             --project "${{ env.JF_PROJECT }}"
 
-          echo "Build info published! Build URL: https://${{ env.JF_URL }}/ui/builds/${{ env.JF_BUILD_NAME }}/${{ env.JF_BUILD_NUMBER }}"
-
   sonarcloud:
-    needs: [lint-and-test-backend, lint-and-test-frontend]
+    needs:
+      - lint-and-test-backend
+      - lint-and-test-frontend
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
