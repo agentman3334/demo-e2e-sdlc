@@ -118,16 +118,6 @@ jobs:
           jf rt build-add-git \
             "${{ env.JF_BUILD_NAME }}" \
             "${{ env.JF_BUILD_NUMBER }}" .
-            
-      - name: Debug JFrog URL
-        run: |
-          echo "JF_URL=${{ env.JF_URL }}"
-          
-      - name: Test JFrog Docker Auth API
-        run: |
-          curl -v \
-            -u "${{ env.JF_USER }}:${{ env.JF_PASSWORD }}" \
-            "https://${{ env.JF_URL }}/artifactory/api/docker/docker-dev-local/v2/auth"
       
       - name: Docker Login
         run: |
