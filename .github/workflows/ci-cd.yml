@@ -8,7 +8,7 @@ on:
 
 env:
   JF_URL: ${{ secrets.JFROG_URL }}
-  JF_USERNAME: ${{ secrets.JFROG_USERNAME }}
+  JF_USER: ${{ secrets.JFROG_USERNAME }}
   JF_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
   JF_BUILD_NAME: pms-build
   JF_BUILD_NUMBER: ${{ github.run_number }}
@@ -107,7 +107,7 @@ jobs:
         run: |
           jf config add jfrog \
             --url=https://${{ env.JF_URL }} \
-            --user=${{ env.JF_USERNAME }} \
+            --user=${{ env.JF_USER }} \
             --access-token=${{ env.JF_PASSWORD }} \
             --interactive=false
 
@@ -122,13 +122,13 @@ jobs:
       - name: Test JFrog Docker Auth API
         run: |
           curl -v \
-            -u "${{ env.JF_USERNAME }}:${{ env.JF_PASSWORD }}" \
+            -u "${{ env.JF_USER }}:${{ env.JF_PASSWORD }}" \
             "https://${{ env.JF_URL }}/artifactory/api/docker/docker-dev-local/v2/auth"
       
       - name: Docker Login
         run: |
           echo "${{ env.JF_PASSWORD }}" | docker login ${{ env.JF_URL }} \
-            -u "${{ env.JF_USERNAME }}" \
+            -u "${{ env.JF_USER }}" \
             --password-stdin
 
       - name: Build Backend Image
