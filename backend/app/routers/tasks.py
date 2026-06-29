@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from app.database import get_db
 from app.models.user import User
-from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskResponse
+from app.schemas.task import TaskCreate, TaskUpdate, TaskStatusUpdate, TaskResponse, PaginatedTaskResponse
 from app.services.task_service import create_task, get_task, list_tasks, update_task, update_task_status, delete_task
 from app.services.project_service import get_project, is_project_member
 from app.utils.dependencies import get_current_user, require_role
@@ -11,14 +11,16 @@ from app.utils.dependencies import get_current_user, require_role
 router = APIRouter(prefix="/api/tasks", tags=["tasks"])
 
 
-@router.get("/", response_model=list[TaskResponse])
+@router.get("/", response_model=PaginatedTaskResponse)
 async def list_all_tasks(
     project_id: Optional[str] = None,
     status: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await list_tasks(db, project_id, status)
+    return await list_tasks(db, project_id, status, page, size)
 
 
 @router.post("/projects/{project_id}/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)

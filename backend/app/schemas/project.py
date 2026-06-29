@@ -30,6 +30,13 @@ class ProjectResponse(BaseModel):
         from_attributes = True
 
 
+class PaginatedProjectResponse(BaseModel):
+    items: List[ProjectResponse]
+    total: int
+    page: int
+    size: int
+
+
 class ProjectMemberAdd(BaseModel):
     user_id: str
     role: Optional[str] = "member"

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from app.models.project import Project, ProjectMember
 from app.models.user import User
 from app.schemas.project import ProjectCreate, ProjectUpdate
@@ -29,14 +29,22 @@ async def get_project(db: AsyncSession, project_id: str) -> Project:
     return project
 
 
-async def list_projects(db: AsyncSession, user_id: str) -> list[Project]:
-    result = await db.execute(
+async def list_projects(db: AsyncSession, user_id: str, page: int = 1, size: int = 20) -> dict:
+    offset = (page - 1) * size
+    base_query = (
         select(Project)
         .join(ProjectMember, ProjectMember.project_id == Project.id)
         .where(ProjectMember.user_id == user_id, Project.is_deleted == False)
-        .order_by(Project.created_at.desc())
     )
-    return list(result.scalars().all())
+    count_result = await db.execute(
+        select(func.count()).select_from(base_query.subquery())
+    )
+    total = count_result.scalar() or 0
+    result = await db.execute(
+        base_query.order_by(Project.created_at.desc()).offset(offset).limit(size)
+    )
+    items = list(result.scalars().all())
+    return {"items": items, "total": total, "page": page, "size": size}
 
 
 async def update_project(db: AsyncSession, project: Project, project_in: ProjectUpdate) -> Project:

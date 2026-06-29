@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class TaskCreate(BaseModel):
@@ -38,3 +38,10 @@ class TaskResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PaginatedTaskResponse(BaseModel):
+    items: List[TaskResponse]
+    total: int
+    page: int
+    size: int
