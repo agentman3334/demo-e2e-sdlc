@@ -118,7 +118,11 @@ jobs:
           jf rt build-add-git \
             "${{ env.JF_BUILD_NAME }}" \
             "${{ env.JF_BUILD_NUMBER }}" .
-
+            
+      - name: Debug JFrog URL
+        run: |
+          echo "JF_URL=${{ env.JF_URL }}"
+          
       - name: Test JFrog Docker Auth API
         run: |
           curl -v \
