@@ -19,16 +19,9 @@ function getPriorityBorderColor(priority) {
   return PRIORITY_BORDER_COLORS[colorName] || '#1677ff';
 }
 
-function TaskCard({ task }) {
+function TaskCardContent({ task }) {
   return (
-    <Card
-      size="small"
-      style={{
-        cursor: 'grab',
-        marginBottom: 8,
-        borderLeft: `3px solid ${getPriorityBorderColor(task.priority)}`,
-      }}
-    >
+    <>
       <Typography.Text strong>{task.title}</Typography.Text>
       {task.description && (
         <Typography.Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 4, marginBottom: 0, fontSize: 12 }}>
@@ -41,7 +34,7 @@ function TaskCard({ task }) {
           <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
         )}
       </div>
-    </Card>
+    </>
   );
 }
 
@@ -66,18 +59,7 @@ function DraggableTaskCard({ task, index }) {
               borderLeft: `3px solid ${getPriorityBorderColor(task.priority)}`,
             }}
           >
-            <Typography.Text strong>{task.title}</Typography.Text>
-            {task.description && (
-              <Typography.Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 4, marginBottom: 0, fontSize: 12 }}>
-                {task.description}
-              </Typography.Paragraph>
-            )}
-            <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Tag color={PRIORITY_COLORS[task.priority]}>{task.priority}</Tag>
-              {task.assignee_id && (
-                <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
-              )}
-            </div>
+            <TaskCardContent task={task} />
           </Card>
         </div>
       )}
