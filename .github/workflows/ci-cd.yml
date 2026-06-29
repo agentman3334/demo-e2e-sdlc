@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  JF_DOCKER_REGISTRY : ${{ secrets.JFROG_PLATFORM_URL }}
+  JFROG_PLATFORM_URL : ${{ secrets.JFROG_PLATFORM_URL }}
   JF_DOCKER_REGISTRY: ${{ secrets.JFROG_DOCKER_REGISTRY }}
   JF_USER: ${{ secrets.JFROG_USERNAME }}
   JF_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
@@ -107,7 +107,7 @@ jobs:
       - name: Configure JFrog CLI
         run: |
           jf config add jfrog \
-            --url=${{ env.JF_DOCKER_REGISTRY  }} \
+            --url=${{ env.JF_PLATFORM_URL   }} \
             --user=${{ env.JF_USER }} \
             --access-token=${{ env.JF_PASSWORD }} \
             --interactive=false
