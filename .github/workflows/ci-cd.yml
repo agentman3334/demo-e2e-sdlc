@@ -150,13 +150,6 @@ jobs:
           docker push \
             ${{ env.JF_DOCKER_REGISTRY }}/docker-dev-local/pms-frontend:${{ github.sha }}
 
-      - name: Publish Build Info
-        run: |
-          jf rt build-publish \
-            "${{ env.JF_BUILD_NAME }}" \
-            "${{ env.JF_BUILD_NUMBER }}" \
-            --project "${{ env.JF_PROJECT }}"
-
   sonarcloud:
     needs:
       - lint-and-test-backend
