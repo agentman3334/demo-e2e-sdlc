@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Row, Col, Button, Typography, Spin, Empty } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import ProjectCard from '../../components/project/ProjectCard';
-import ProjectForm from '../../components/project/ProjectForm';
-import projectApi from '../../api/projectApi';
-import analyticsApi from '../../api/analyticsApi';
+import ProjectCard from '../components/project/ProjectCard';
+import ProjectForm from '../components/project/ProjectForm';
+import projectApi from '../api/projectApi';
+import analyticsApi from '../api/analyticsApi';
 import { message } from 'antd';
 
 export default function ProjectsPage() {

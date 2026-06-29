@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
