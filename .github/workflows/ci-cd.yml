@@ -7,9 +7,11 @@ on:
     branches: [main]
 
 env:
-  REGISTRY: ${{ secrets.JFROG_URL }}
-  BACKEND_IMAGE: ${{ secrets.JFROG_URL }}/pms-backend
-  FRONTEND_IMAGE: ${{ secrets.JFROG_URL }}/pms-frontend
+  JF_URL: ${{ secrets.JFROG_URL }}
+  JF_ACCESS_TOKEN: ${{ secrets.JFROG_PASS }}
+  JF_BUILD_NAME: pms-build
+  JF_BUILD_NUMBER: ${{ github.run_number }}
+  JF_PROJECT: ${{ secrets.JFROG_PROJECT }}
 
 jobs:
   lint-and-test-backend:
@@ -73,28 +75,75 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Login to JFrog
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ secrets.JFROG_URL }}
-          username: ${{ secrets.JFROG_USER }}
-          password: ${{ secrets.JFROG_PASS }}
-      - name: Build & push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: |
-            ${{ env.BACKEND_IMAGE }}:latest
-            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-      - name: Build & push frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:latest
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v4
+
+      - name: Configure JFrog CLI
+        run: |
+          jf config add manual-jfrog \
+            --url https://${{ env.JF_URL }} \
+            --access-token ${{ env.JF_ACCESS_TOKEN }} \
+            --interactive=false
+          jf config use manual-jfrog
+
+      - name: Add Git Info to Build
+        run: |
+          jf rt build-add-git "${{ env.JF_BUILD_NAME }}" "${{ env.JF_BUILD_NUMBER }}" .
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm install --legacy-peer-deps && npm run build
+
+      - name: Upload Frontend Artifacts to JFrog Artifactory
+        run: |
+          VERSION_TAG="${{ github.sha }}"
+          ENV_NAME="dev"
+
+          ARTIFACT_PATH="frontend/dist/"
+          TARGET_REPO="git-repo"
+          TARGET_PATH="${TARGET_REPO}/pms-builds/${ENV_NAME}/${VERSION_TAG}/"
+
+          echo "Uploading: ${ARTIFACT_PATH} -> ${TARGET_PATH}"
+
+          jf rt upload \
+            --build-name "${{ env.JF_BUILD_NAME }}" \
+            --build-number "${{ env.JF_BUILD_NUMBER }}" \
+            --project "${{ env.JF_PROJECT }}" \
+            --recursive \
+            "${ARTIFACT_PATH}**" \
+            "${TARGET_PATH}"
+
+          echo "Upload complete! https://${{ env.JF_URL }}/artifactory/${TARGET_PATH}"
+
+      - name: Upload Backend Artifacts to JFrog Artifactory
+        run: |
+          VERSION_TAG="${{ github.sha }}"
+          ENV_NAME="dev"
+
+          ARTIFACT_PATH="backend/"
+          TARGET_REPO="git-repo"
+          TARGET_PATH="${TARGET_REPO}/pms-backend/${ENV_NAME}/${VERSION_TAG}/"
+
+          echo "Uploading: ${ARTIFACT_PATH} -> ${TARGET_PATH}"
+
+          jf rt upload \
+            --build-name "${{ env.JF_BUILD_NAME }}" \
+            --build-number "${{ env.JF_BUILD_NUMBER }}" \
+            --project "${{ env.JF_PROJECT }}" \
+            --recursive \
+            --exclude-patterns="*__pycache__*;*.pyc;*.egg-info*;venv/*;.venv/*" \
+            "${ARTIFACT_PATH}**" \
+            "${TARGET_PATH}"
+
+          echo "Upload complete! https://${{ env.JF_URL }}/artifactory/${TARGET_PATH}"
+
+      - name: Publish Build Info to JFrog
+        run: |
+          jf rt build-publish "${{ env.JF_BUILD_NAME }}" "${{ env.JF_BUILD_NUMBER }}" \
+            --project "${{ env.JF_PROJECT }}"
+
+          echo "Build info published! Build URL: https://${{ env.JF_URL }}/ui/builds/${{ env.JF_BUILD_NAME }}/${{ env.JF_BUILD_NUMBER }}"
 
   sonarcloud:
     needs: [lint-and-test-backend, lint-and-test-frontend]
