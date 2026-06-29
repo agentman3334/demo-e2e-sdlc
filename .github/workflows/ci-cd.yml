@@ -136,16 +136,10 @@ jobs:
       - name: Push Backend Image
         run: |
           docker push \
-            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:${{ github.sha }} \
-            --build-name ${{ env.JF_BUILD_NAME }} \
-            --build-number ${{ env.JF_BUILD_NUMBER }} \
-            --project ${{ env.JF_PROJECT }}
-
+            ${{ env.JF_DOCKER_REGISTRY }}/docker-dev-local/pms-backend:${{ github.sha }}
+      
           docker push \
-            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:latest \
-            --build-name ${{ env.JF_BUILD_NAME }} \
-            --build-number ${{ env.JF_BUILD_NUMBER }} \
-            --project ${{ env.JF_PROJECT }}
+            ${{ env.JF_DOCKER_REGISTRY }}/docker-dev-local/pms-backend:latest
 
       - name: Build Frontend Image
         run: |
