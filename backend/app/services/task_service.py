@@ -3,7 +3,8 @@ from sqlalchemy import select, func
 from app.models.task import Task
 from app.models.project import Project, ProjectMember
 from app.schemas.task import TaskCreate, TaskUpdate
-from fastapi import HTTPException, status
+from app.utils.crud import get_or_404, apply_update, soft_delete, paginated_list
+from fastapi import HTTPException
 from datetime import datetime, timezone
 
 
@@ -22,34 +23,21 @@ async def create_task(db: AsyncSession, project_id: str, task_in: TaskCreate) ->
 
 
 async def get_task(db: AsyncSession, task_id: str) -> Task:
-    result = await db.execute(select(Task).where(Task.id == task_id, Task.is_deleted == False))
-    task = result.scalar_one_or_none()
-    if not task:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
+    return await get_or_404(db, Task, task_id, "Task")
 
 
 async def list_tasks(db: AsyncSession, project_id: str = None, status_filter: str = None, page: int = 1, size: int = 20) -> dict:
-    offset = (page - 1) * size
     query = select(Task).where(Task.is_deleted == False)
     if project_id:
         query = query.where(Task.project_id == project_id)
     if status_filter:
         query = query.where(Task.status == status_filter)
-    count_query = select(func.count()).select_from(query.subquery())
-    total_result = await db.execute(count_query)
-    total = total_result.scalar() or 0
-    result = await db.execute(query.order_by(Task.created_at.desc()).offset(offset).limit(size))
-    items = list(result.scalars().all())
-    return {"items": items, "total": total, "page": page, "size": size}
+    query = query.order_by(Task.created_at.desc())
+    return await paginated_list(db, query, page, size)
 
 
 async def update_task(db: AsyncSession, task: Task, task_in: TaskUpdate) -> Task:
-    update_data = task_in.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(task, field, value)
-    await db.flush()
-    return task
+    return await apply_update(db, task, task_in)
 
 
 async def update_task_status(db: AsyncSession, task: Task, new_status: str) -> Task:
@@ -62,8 +50,7 @@ async def update_task_status(db: AsyncSession, task: Task, new_status: str) -> T
 
 
 async def delete_task(db: AsyncSession, task: Task) -> None:
-    task.is_deleted = True
-    await db.flush()
+    await soft_delete(db, task)
 
 
 async def get_dashboard_stats(db: AsyncSession, user_id: str) -> dict:

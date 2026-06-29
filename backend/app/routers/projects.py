@@ -32,7 +32,11 @@ async def create_new_project(
     return project
 
 
-@router.get("/{project_id}", response_model=ProjectResponse)
+@router.get(
+    "/{project_id}",
+    response_model=ProjectResponse,
+    responses={403: {"description": "Not a project member"}, 404: {"description": "Project not found"}},
+)
 async def get_project_detail(
     project_id: str,
     current_user: User = Depends(get_current_user),

@@ -10,7 +10,12 @@ from app.utils.dependencies import get_current_user
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    responses={400: {"description": "Email already registered"}},
+)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user_in.email))
     if result.scalar_one_or_none():
@@ -26,7 +31,11 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     return user
 
 
-@router.post("/login", response_model=Token)
+@router.post(
+    "/login",
+    response_model=Token,
+    responses={401: {"description": "Invalid credentials"}, 403: {"description": "Account is disabled"}},
+)
 async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == user_in.email))
     user = result.scalar_one_or_none()
@@ -41,7 +50,11 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)):
     )
 
 
-@router.post("/refresh", response_model=Token)
+@router.post(
+    "/refresh",
+    response_model=Token,
+    responses={401: {"description": "Invalid or expired refresh token"}},
+)
 async def refresh_token(token_in: TokenRefresh, db: AsyncSession = Depends(get_db)):
     try:
         payload = decode_token(token_in.refresh_token)
@@ -66,7 +79,11 @@ async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-@router.put("/me", response_model=UserResponse)
+@router.put(
+    "/me",
+    response_model=UserResponse,
+    responses={400: {"description": "Email already in use"}},
+)
 async def update_me(
     user_in: UserUpdate,
     current_user: User = Depends(get_current_user),

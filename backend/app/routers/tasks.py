@@ -43,7 +43,11 @@ async def get_task_detail(
     return await get_task(db, task_id)
 
 
-@router.put("/{task_id}", response_model=TaskResponse)
+@router.put(
+    "/{task_id}",
+    response_model=TaskResponse,
+    responses={403: {"description": "Can only update your own tasks"}, 404: {"description": "Task not found"}},
+)
 async def update_task_detail(
     task_id: str,
     task_in: TaskUpdate,
@@ -56,7 +60,11 @@ async def update_task_detail(
     return await update_task(db, task, task_in)
 
 
-@router.patch("/{task_id}/status", response_model=TaskResponse)
+@router.patch(
+    "/{task_id}/status",
+    response_model=TaskResponse,
+    responses={403: {"description": "Can only update your own tasks"}, 404: {"description": "Task not found"}},
+)
 async def update_task_status_endpoint(
     task_id: str,
     status_in: TaskStatusUpdate,

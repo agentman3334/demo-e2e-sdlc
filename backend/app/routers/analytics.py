@@ -15,7 +15,10 @@ async def dashboard_stats(current_user: User = Depends(get_current_user)):
         return await get_dashboard_stats(db, current_user.id)
 
 
-@router.get("/project/{project_id}")
+@router.get(
+    "/project/{project_id}",
+    responses={403: {"description": "Not a project member"}, 404: {"description": "Project not found"}},
+)
 async def project_stats(
     project_id: str,
     current_user: User = Depends(get_current_user),
