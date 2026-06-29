@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin, Token, TokenRefresh, UserResponse, UserUpdate
@@ -12,9 +12,14 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.email == user_in.email))
-    if result.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Email already registered")
+    result = await db.execute(
+        select(User).where(or_(User.email == user_in.email, User.full_name == user_in.full_name))
+    )
+    existing = result.scalar_one_or_none()
+    if existing:
+        if existing.email == user_in.email:
+            raise HTTPException(status_code=409, detail="Email already registered")
+        raise HTTPException(status_code=409, detail="Username already taken")
     user = User(
         email=user_in.email,
         hashed_password=hash_password(user_in.password),
@@ -77,7 +82,7 @@ async def update_me(
         result = await db.execute(select(User).where(User.email == update_data["email"]))
         existing = result.scalar_one_or_none()
         if existing and existing.id != current_user.id:
-            raise HTTPException(status_code=400, detail="Email already in use")
+            raise HTTPException(status_code=409, detail="Email already in use")
     for field, value in update_data.items():
         setattr(current_user, field, value)
     await db.flush()
