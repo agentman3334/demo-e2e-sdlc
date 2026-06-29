@@ -19,9 +19,9 @@ class ProjectUpdate(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     status: str
-    deadline: Optional[datetime]
+    deadline: Optional[datetime] = None
     owner_id: str
     created_at: datetime
     updated_at: datetime

@@ -28,11 +28,11 @@ class TaskResponse(BaseModel):
     id: str
     project_id: str
     title: str
-    description: Optional[str]
+    description: Optional[str] = None
     status: str
     priority: str
-    assignee_id: Optional[str]
-    due_date: Optional[datetime]
+    assignee_id: Optional[str] = None
+    due_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
