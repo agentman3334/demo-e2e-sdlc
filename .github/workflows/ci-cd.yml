@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  JF_URL: ${{ secrets.JFROG_PLATFORM_URL }}
+  JF_DOCKER_REGISTRY : ${{ secrets.JFROG_PLATFORM_URL }}
   JF_DOCKER_REGISTRY: ${{ secrets.JFROG_DOCKER_REGISTRY }}
   JF_USER: ${{ secrets.JFROG_USERNAME }}
   JF_PASSWORD: ${{ secrets.JFROG_PASSWORD }}
@@ -107,7 +107,7 @@ jobs:
       - name: Configure JFrog CLI
         run: |
           jf config add jfrog \
-            --url=${{ env.JF_URL }} \
+            --url=${{ env.JF_DOCKER_REGISTRY  }} \
             --user=${{ env.JF_USER }} \
             --access-token=${{ env.JF_PASSWORD }} \
             --interactive=false
@@ -122,27 +122,27 @@ jobs:
       
       - name: Docker Login
         run: |
-          echo "${{ env.JF_PASSWORD }}" | docker login ${{ env.JF_URL }} \
+          echo "${{ env.JF_PASSWORD }}" | docker login ${{ env.JF_DOCKER_REGISTRY }} \
             -u "${{ env.JF_USER }}" \
             --password-stdin
 
       - name: Build Backend Image
         run: |
           docker build \
-            -t ${{ env.JF_URL }}/docker-dev-local/pms-backend:${{ github.sha }} \
-            -t ${{ env.JF_URL }}/docker-dev-local/pms-backend:latest \
+            -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:${{ github.sha }} \
+            -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:latest \
             ./backend
 
       - name: Push Backend Image
         run: |
           jf docker push \
-            ${{ env.JF_URL }}/docker-dev-local/pms-backend:${{ github.sha }} \
+            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:${{ github.sha }} \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
 
           jf docker push \
-            ${{ env.JF_URL }}/docker-dev-local/pms-backend:latest \
+            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-backend:latest \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
@@ -150,20 +150,20 @@ jobs:
       - name: Build Frontend Image
         run: |
           docker build \
-            -t ${{ env.JF_URL }}/docker-dev-local/pms-frontend:${{ github.sha }} \
-            -t ${{ env.JF_URL }}/docker-dev-local/pms-frontend:latest \
+            -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:${{ github.sha }} \
+            -t ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:latest \
             ./frontend
 
       - name: Push Frontend Image
         run: |
           jf docker push \
-            ${{ env.JF_URL }}/docker-dev-local/pms-frontend:${{ github.sha }} \
+            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:${{ github.sha }} \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
 
           jf docker push \
-            ${{ env.JF_URL }}/docker-dev-local/pms-frontend:latest \
+            ${{ env.JF_DOCKER_REGISTRY  }}/docker-dev-local/pms-frontend:latest \
             --build-name ${{ env.JF_BUILD_NAME }} \
             --build-number ${{ env.JF_BUILD_NUMBER }} \
             --project ${{ env.JF_PROJECT }}
