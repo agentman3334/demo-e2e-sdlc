@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/charts": "^2.0.0",
+
     "@ant-design/icons": "^5.2.6",
     "@hello-pangea/dnd": "^16.6.0",
     "antd": "^5.12.2",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Row, Col, Card, Statistic, Typography, Progress, Spin, Select } from 'antd';
+import { Row, Col, Card, Statistic, Typography, Progress, Spin, Select, Tag } from 'antd';
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -7,8 +7,55 @@ import {
   ProjectOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { Pie } from '@ant-design/charts';
 import analyticsApi from '../api/analyticsApi';
+
+function SimpleDonut({ data, colors }) {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) return <Typography.Text type="secondary">No data</Typography.Text>;
+
+  let cumulative = 0;
+  const segments = data.map((d, i) => {
+    const start = (cumulative / total) * 360;
+    cumulative += d.value;
+    const end = (cumulative / total) * 360;
+    return { ...d, start, end, color: colors[i % colors.length] };
+  });
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+      <div style={{ position: 'relative', width: 160, height: 160 }}>
+        <svg viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
+          {segments.map((s, i) => (
+            <circle
+              key={i}
+              r="15.91549"
+              cx="18"
+              cy="18"
+              fill="transparent"
+              stroke={s.color}
+              strokeWidth="3.5"
+              strokeDasharray={`${((s.end - s.start) / 360) * 100} ${100 - ((s.end - s.start) / 360) * 100}`}
+              strokeDashoffset={`${-((s.start / 360) * 100)}`}
+            />
+          ))}
+        </svg>
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+          <Typography.Text strong style={{ fontSize: 20 }}>{total}</Typography.Text>
+          <br />
+          <Typography.Text type="secondary" style={{ fontSize: 11 }}>tasks</Typography.Text>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {segments.map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: s.color }} />
+            <Typography.Text style={{ fontSize: 12 }}>{s.type}: {s.value}</Typography.Text>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
@@ -34,46 +81,19 @@ export default function DashboardPage() {
 
   if (loading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
 
-  const statusPieData = stats ? [
-    { type: 'To Do', value: (stats.total_tasks || 0) - (stats.completed || 0) - (stats.in_progress || 0) },
-    { type: 'In Progress', value: stats.in_progress || 0 },
-    { type: 'Completed', value: stats.completed || 0 },
-  ].filter(d => d.value > 0) : [];
+  const todoCount = (stats?.total_tasks || 0) - (stats?.completed || 0) - (stats?.in_progress || 0);
+  const statusData = [
+    { type: 'To Do', value: todoCount > 0 ? todoCount : 0 },
+    { type: 'In Progress', value: stats?.in_progress || 0 },
+    { type: 'Completed', value: stats?.completed || 0 },
+  ].filter(d => d.value > 0);
 
-  const pieConfig = {
-    appendPadding: 10,
-    data: statusPieData,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 0.8,
-    label: {
-      type: 'outer',
-      content: '{name} {percentage}',
-    },
-    interactions: [{ type: 'pie-legend-active' }, { type: 'element-active' }],
-    color: ['#d9d9d9', '#1677ff', '#52c41a'],
-  };
-
-  const projectPieData = projectStats ? [
+  const projectStatusData = projectStats ? [
     { type: 'To Do', value: projectStats.status_counts?.todo || 0 },
     { type: 'In Progress', value: projectStats.status_counts?.in_progress || 0 },
     { type: 'In Review', value: projectStats.status_counts?.in_review || 0 },
     { type: 'Done', value: projectStats.status_counts?.done || 0 },
   ].filter(d => d.value > 0) : [];
-
-  const projectPieConfig = {
-    appendPadding: 10,
-    data: projectPieData,
-    angleField: 'value',
-    colorField: 'type',
-    radius: 0.8,
-    label: {
-      type: 'outer',
-      content: '{name} {percentage}',
-    },
-    interactions: [{ type: 'pie-legend-active' }, { type: 'element-active' }],
-    color: ['#d9d9d9', '#1677ff', '#faad14', '#52c41a'],
-  };
 
   return (
     <div>
@@ -104,7 +124,7 @@ export default function DashboardPage() {
       <Row gutter={16} style={{ marginBottom: 32 }}>
         <Col span={12}>
           <Card title="Task Distribution">
-            {statusPieData.length > 0 ? <Pie {...pieConfig} /> : <Typography.Text type="secondary">No tasks yet</Typography.Text>}
+            <SimpleDonut data={statusData} colors={['#d9d9d9', '#1677ff', '#52c41a']} />
           </Card>
         </Col>
         <Col span={12}>
@@ -122,7 +142,7 @@ export default function DashboardPage() {
                   <Typography.Text strong>{projectStats.project_name}</Typography.Text>
                   <Progress percent={projectStats.progress} style={{ marginTop: 8 }} />
                 </div>
-                {projectPieData.length > 0 && <Pie {...projectPieConfig} />}
+                <SimpleDonut data={projectStatusData} colors={['#d9d9d9', '#1677ff', '#faad14', '#52c41a']} />
               </div>
             ) : (
               <Typography.Text type="secondary">Select a project to view details</Typography.Text>
