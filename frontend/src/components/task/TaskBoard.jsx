@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Tag, Avatar, Typography, Button, Empty, Spin, message } from 'antd';
+import { Card, Tag, Avatar, Typography, Button, Empty, Spin, message } from 'antd';
 import { UserOutlined, PlusOutlined } from '@ant-design/icons';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import taskApi from '../../api/taskApi';
 import projectApi from '../../api/projectApi';
 import TaskForm from './TaskForm';
@@ -19,7 +20,7 @@ export default function TaskBoard({ projectId }) {
       const params = {};
       if (selectedProjectId) params.project_id = selectedProjectId;
       const { data } = await taskApi.list(params);
-      setTasks(data);
+      setTasks(data.items || data);
     } catch {
       message.error('Failed to load tasks');
     } finally {
@@ -30,7 +31,7 @@ export default function TaskBoard({ projectId }) {
   const fetchProjects = async () => {
     try {
       const { data } = await projectApi.list();
-      setProjects(data);
+      setProjects(data.items || data);
     } catch {
       // silently fail
     }
@@ -44,11 +45,14 @@ export default function TaskBoard({ projectId }) {
     if (!projectId) fetchProjects();
   }, [projectId]);
 
-  const handleStatusChange = async (taskId, newStatus) => {
+  const handleDragEnd = async (result) => {
+    const { draggableId, destination } = result;
+    if (!destination) return;
+    const newStatus = destination.droppableId;
     try {
-      await taskApi.updateStatus(taskId, { status: newStatus });
+      await taskApi.updateStatus(draggableId, { status: newStatus });
       setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+        prev.map((t) => (t.id === draggableId ? { ...t, status: newStatus } : t))
       );
     } catch {
       message.error('Failed to update task status');
@@ -63,6 +67,16 @@ export default function TaskBoard({ projectId }) {
       fetchTasks();
     } catch (error) {
       message.error(error.response?.data?.detail || 'Failed to create task');
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      await taskApi.delete(taskId);
+      message.success('Task deleted');
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } catch {
+      message.error('Failed to delete task');
     }
   };
 
@@ -93,51 +107,77 @@ export default function TaskBoard({ projectId }) {
         </Button>
       </div>
 
-      <Row gutter={16}>
-        {Object.entries(TASK_STATUSES).map(([key, col]) => (
-          <Col span={6} key={key}>
-            <div style={{ marginBottom: 8 }}>
-              <Tag color={col.color} style={{ fontSize: 14, padding: '4px 12px' }}>
-                {col.label}
-              </Tag>
-              <span style={{ color: '#999' }}>{tasks.filter((t) => t.status === key).length}</span>
-            </div>
-            <div
-              style={{ minHeight: 400, padding: 8, background: '#fafafa', borderRadius: 8 }}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                const taskId = e.dataTransfer.getData('taskId');
-                handleStatusChange(taskId, key);
-              }}
-            >
-              {tasks
-                .filter((t) => t.status === key)
-                .map((task) => (
-                  <Card
-                    key={task.id}
-                    size="small"
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData('taskId', task.id)}
-                    style={{ marginBottom: 8, cursor: 'grab' }}
-                  >
-                    <Typography.Text strong>{task.title}</Typography.Text>
-                    {task.description && (
-                      <Typography.Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 4, marginBottom: 0, fontSize: 12 }}>
-                        {task.description}
-                      </Typography.Paragraph>
-                    )}
-                    <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Tag color={PRIORITY_COLORS[task.priority]}>{task.priority}</Tag>
-                      {task.assignee_id && (
-                        <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
-                      )}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
+          {Object.entries(TASK_STATUSES).map(([key, col]) => {
+            const columnTasks = tasks.filter((t) => t.status === key);
+            return (
+              <div key={key} style={{ flex: '1 1 0%', minWidth: 260 }}>
+                <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Tag color={col.color} style={{ fontSize: 14, padding: '4px 12px' }}>
+                    {col.label}
+                  </Tag>
+                  <span style={{ color: '#999' }}>{columnTasks.length}</span>
+                </div>
+                <Droppable droppableId={key}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      style={{
+                        minHeight: 400,
+                        padding: 8,
+                        background: snapshot.isDraggingOver ? '#e6f4ff' : '#fafafa',
+                        borderRadius: 8,
+                        transition: 'background 0.2s ease',
+                      }}
+                    >
+                      {columnTasks.map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                marginBottom: 8,
+                              }}
+                            >
+                              <Card
+                                size="small"
+                                style={{
+                                  cursor: 'grab',
+                                  opacity: snapshot.isDragging ? 0.8 : 1,
+                                  borderLeft: `3px solid ${PRIORITY_COLORS[task.priority] === 'red' ? '#ff4d4f' : PRIORITY_COLORS[task.priority] === 'orange' ? '#fa8c16' : PRIORITY_COLORS[task.priority] === 'magenta' ? '#eb2f96' : '#1677ff'}`,
+                                }}
+                              >
+                                <Typography.Text strong>{task.title}</Typography.Text>
+                                {task.description && (
+                                  <Typography.Paragraph type="secondary" ellipsis={{ rows: 2 }} style={{ marginTop: 4, marginBottom: 0, fontSize: 12 }}>
+                                    {task.description}
+                                  </Typography.Paragraph>
+                                )}
+                                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <Tag color={PRIORITY_COLORS[task.priority]}>{task.priority}</Tag>
+                                  {task.assignee_id && (
+                                    <Avatar size="small" icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
+                                  )}
+                                </div>
+                              </Card>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
                     </div>
-                  </Card>
-                ))}
-            </div>
-          </Col>
-        ))}
-      </Row>
+                  )}
+                </Droppable>
+              </div>
+            );
+          })}
+        </div>
+      </DragDropContext>
 
       <TaskForm
         open={formOpen}

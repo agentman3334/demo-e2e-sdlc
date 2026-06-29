@@ -16,7 +16,7 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     try {
       const { data } = await projectApi.list();
-      setProjects(data);
+      setProjects(data.items || data);
     } catch (error) {
       message.error('Failed to load projects');
     } finally {

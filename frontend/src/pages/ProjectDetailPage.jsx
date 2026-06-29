@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Typography, Descriptions, Tag, Button, Spin, Popconfirm, message } from 'antd';
+import { Typography, Descriptions, Tag, Button, Spin, Popconfirm, message, Tabs } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import projectApi from '../api/projectApi';
 import taskApi from '../api/taskApi';
 import ProjectForm from '../components/project/ProjectForm';
 import TaskBoard from '../components/task/TaskBoard';
+import MemberManager from '../components/project/MemberManager';
 import { PROJECT_STATUSES } from '../utils/constants';
 
 export default function ProjectDetailPage() {
@@ -77,8 +78,21 @@ export default function ProjectDetailPage() {
       {project.description && (
         <Typography.Paragraph style={{ marginBottom: 24 }}>{project.description}</Typography.Paragraph>
       )}
-      <Typography.Title level={4}>Tasks</Typography.Title>
-      <TaskBoard projectId={id} />
+      <Tabs
+        defaultActiveKey="tasks"
+        items={[
+          {
+            key: 'tasks',
+            label: 'Tasks',
+            children: <TaskBoard projectId={id} />,
+          },
+          {
+            key: 'members',
+            label: 'Members',
+            children: <MemberManager projectId={id} />,
+          },
+        ]}
+      />
       <ProjectForm open={editOpen} onClose={() => setEditOpen(false)} onSubmit={handleUpdate} initialValues={project} />
     </div>
   );
