@@ -8,10 +8,6 @@
 
 A full-stack Project Management System built with React.js (Vite + Ant Design) frontend and Python (FastAPI) backend.
 
-[![CI/CD](https://github.com/agentman3334/demo-e2e-sdlc/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/agentman3334/demo-e2e-sdlc/actions/workflows/ci-cd.yml)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=agentman3334_demo-e2e-sdlc&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=agentman3334_demo-e2e-sdlc)
-[![Security](https://sonarcloud.io/api/project_badges/measure?project=agentman3334_demo-e2e-sdlc&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=agentman3334_demo-e2e-sdlc)
-[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=agentman3334_demo-e2e-sdlc&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=agentman3334_demo-e2e-sdlc)
 
 </div>
 
