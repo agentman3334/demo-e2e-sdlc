@@ -1,5 +1,7 @@
 # Project Management System
 
+> **Project Goal:** Demonstrate an agentic DevOps pipeline flow where a primary **PM Agent** orchestrates subagents — using official MCP servers and Skills — to automate the full software development lifecycle from requirements to deployment.
+
 A full-stack Project Management System built with React.js (Vite + Ant Design) frontend and Python (FastAPI) backend.
 
 ## Features
