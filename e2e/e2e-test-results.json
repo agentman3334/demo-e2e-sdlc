@@ -1,0 +1,532 @@
+{
+  "total": 98,
+  "passed": 98,
+  "failed": 0,
+  "errors": [],
+  "byFeature": {
+    "SCRUM-4/5: Auth System": {
+      "passed": 26,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Register new user — 201 Created",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Register returns user ID",
+          "passed": "341e22e8-ac1f-46ba-83ad-3595c3826528",
+          "error": null
+        },
+        {
+          "name": "Register returns correct email",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Register defaults role to member",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Register user is active",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Duplicate email registration — 400",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Missing fields registration — 422",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Invalid email registration — 422",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Login with valid credentials — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Login returns access_token",
+          "passed": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDFlMjJlOC1hYzFmLTQ2YmEtODNhZC0zNTk1YzM4MjY1MjgiLCJyb2xlIjoibWVtYmVyIiwiZXhwIjoxNzgyODA0MDI5LCJ0eXBlIjoiYWNjZXNzIn0.yH2vnfePz5mKSmBaBayM1dJfHWjAIO6g8631jDRLZsU",
+          "error": null
+        },
+        {
+          "name": "Login returns refresh_token",
+          "passed": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDFlMjJlOC1hYzFmLTQ2YmEtODNhZC0zNTk1YzM4MjY1MjgiLCJyb2xlIjoibWVtYmVyIiwiZXhwIjoxNzgzNDA3MDI5LCJ0eXBlIjoicmVmcmVzaCJ9.tQSDNzYp-xRwvFAROd-0DWa0mOeYgpoxzSVNK-vhJAI",
+          "error": null
+        },
+        {
+          "name": "Login token_type is bearer",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Login with wrong password — 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Login with non-existent email — 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Refresh token — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Refresh returns new access_token",
+          "passed": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzNDFlMjJlOC1hYzFmLTQ2YmEtODNhZC0zNTk1YzM4MjY1MjgiLCJyb2xlIjoibWVtYmVyIiwiZXhwIjoxNzgyODA0MDI5LCJ0eXBlIjoiYWNjZXNzIn0.yH2vnfePz5mKSmBaBayM1dJfHWjAIO6g8631jDRLZsU",
+          "error": null
+        },
+        {
+          "name": "Invalid refresh token — 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Access token used as refresh — 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "GET /me with valid token — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "/me returns correct email",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "/me returns correct user ID",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "GET /me without token — 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "GET /me with invalid token — 401",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "PUT /me update full_name — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "PUT /me full_name updated",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "PUT /me without token — 403",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    "SCRUM-6: Project CRUD": {
+      "passed": 24,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Member cannot create project — 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List projects — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List returns items array",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List returns total count",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List projects without auth — 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Promote user to admin role",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Create project as admin — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project name correct",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project status defaults to active",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project owner_id correct",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Create second project — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List projects with items — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List shows at least 2 projects",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get project by ID — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get project returns correct ID",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get non-existent project — 404",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Update project — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project name updated",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Add member to project — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Add duplicate member — 400",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Member can view project — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Remove member from project — 204",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Delete project — 204",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Deleted project returns 404",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    "SCRUM-8: Tasks & Analytics": {
+      "passed": 35,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Create task — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task title correct",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task status defaults to todo",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task priority correct",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task project_id correct",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Create second task — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Member cannot create task — 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List tasks — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "List shows at least 2 tasks",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get task by ID — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get task returns correct ID",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Get non-existent task — 404",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Update task — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task title updated",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Update task status to in_progress — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task status is in_progress",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task status → in_review — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task status → done — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Invalid task status — 400",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Filter tasks by status — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Filtered tasks all have done status",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Analytics dashboard — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Dashboard returns total_tasks",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Dashboard returns completed count",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Dashboard returns in_progress count",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Dashboard returns projects array",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project analytics — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project analytics returns correct project_id",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project analytics returns total_tasks",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project analytics returns status_counts",
+          "passed": {
+            "done": 1,
+            "in_progress": 0,
+            "in_review": 0,
+            "todo": 1
+          },
+          "error": null
+        },
+        {
+          "name": "Project analytics returns priority_counts",
+          "passed": {
+            "critical": 0,
+            "high": 1,
+            "low": 0,
+            "medium": 1
+          },
+          "error": null
+        },
+        {
+          "name": "Project analytics returns progress",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Dashboard without auth — 403",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Delete task — 204",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Deleted task returns 404",
+          "passed": true,
+          "error": null
+        }
+      ]
+    },
+    "SCRUM-7/9: Frontend APIs": {
+      "passed": 13,
+      "failed": 0,
+      "tests": [
+        {
+          "name": "Project pagination — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Pagination respects size param",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Task filtering by project and status — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Kanban: task → todo — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Kanban: task → in_progress — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Kanban: task → in_review — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Kanban: task → done — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Create task assigned to member — 201",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project tasks list — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project has multiple tasks",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Project analytics with tasks — 200",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Progress is non-negative",
+          "passed": true,
+          "error": null
+        },
+        {
+          "name": "Progress is at most 100",
+          "passed": true,
+          "error": null
+        }
+      ]
+    }
+  }
+}
