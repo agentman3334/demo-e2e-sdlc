@@ -7,3 +7,5 @@ build/
 node_modules/
 .vite/
 pgdata/
+sonar-project.properties
+TDD-ProjectManagementSystem-202606291000.md
