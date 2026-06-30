@@ -78,7 +78,7 @@ This project was built end-to-end by a 10-step agentic SDLC pipeline powered by 
 | **Semgrep MCP** | Local security & quality scanning |
 | **JFrog MCP** | Artifact verification, Xray security, build info |
 
-### Skills
+### Skills (Official)
 
 | Skill | Purpose |
 |-------|---------|
