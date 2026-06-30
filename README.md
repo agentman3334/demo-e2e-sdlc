@@ -78,6 +78,12 @@ This project was built end-to-end by a 10-step agentic SDLC pipeline powered by 
 | **Semgrep MCP** | Local security & quality scanning |
 | **JFrog MCP** | Artifact verification, Xray security, build info |
 
+### Skills
+
+| Skill | Purpose |
+|-------|---------|
+| **Microsoft Playwright CLI** | E2E test automation — browser interactions, snapshots, assertions |
+
 ### Pipeline Steps
 
 1. **Requirement Breakdown** → 1b. **Requirement Review** (gate) → 2. **Sprint Start & SDD Setup** → 3. **Development & Fix** → 4. **Code Review** → 5. **CI/CD Pipeline** → 5b. **JFrog Verification** → 6. **SonarCloud Scanning** → 7. **E2E Testing** (Playwright) → 8. **Release Review** (PR Merge Gate) → 9. **Huawei Cloud ECS Deployment** → 10. **Sprint Close**
